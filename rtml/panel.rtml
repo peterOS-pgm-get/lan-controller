@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RTML version="1">
+    <body>
+        <text>LAN-Controller Panel</text>
+        <link x="40" y="1" href="/logout">Logout</link>
+
+        <link x="2" y="2" href="/dhcp">DHCP</link>
+        <link x="7" y="2" href="/dns">DNS</link>
+        <link x="11" y="2" href="/nat">NAT</link>
+
+    </body>
+</RTML>

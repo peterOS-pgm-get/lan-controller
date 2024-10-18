@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RTML version="1">
+    <body>
+        <text>
+            NAT Panel
+        </text>
+        <link x="2" href="/panel">Root Panel</link>
+
+        <text x="2" y="4">Domain</text>
+        <text x="22" y="4">Port</text>
+        <text x="30" y="4">Destination</text>
+
+    </body>
+</RTML>

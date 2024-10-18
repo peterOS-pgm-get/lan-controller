@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RTML version="1">
+    <body>
+        <text>
+            LAN-Controller
+        </text>
+    
+        <text x="3" y="4">User:</text>
+        <input x="9" y="4" len="16" name="user" next="pass" />
+    
+        <text x="3" y="5">Pass:</text>
+        <input x="9" y="5" len="16" name="pass" hide="true"></input>
+    
+        <button x="4" y="6" action="SUBMIT">
+            Login
+        </button>
+    </body>
+</RTML>

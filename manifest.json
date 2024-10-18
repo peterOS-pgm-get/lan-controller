@@ -1,0 +1,17 @@
+{
+    "version": 0.1,
+    "files": [
+        "core.lua",
+        "dhcp.lua",
+        "dns.lua",
+        "nat.lua",
+        "rtml/404.rtml",
+        "rtml/panel.rtml",
+        "rtml/login.rtml",
+        "rtml/dns.rtml",
+        "rtml/nat.rtml"
+    ],
+    "exec": null,
+    "cmpt": null,
+    "startup": null
+}

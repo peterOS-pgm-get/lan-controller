@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RTML>
+    <body>
+        <text>DNS - Edit Record</text>
+        <link x="2" href="/dns">DNNS Panel</link>
+
+        <text x="3" y="4">Domain</text>
+        <input x="3" y="5" name="domain" len="16" />
+        <text x="3" y="6">Type (A, CNAME, NS)</text>
+        <input x="3" y="7" name="type" len="16" />
+        <text x="3" y="8">Porinter</text>
+        <input x="3" y="9" name="pointer" len="16" />
+        <text x="3" y="10">TTL (minutes)</text>
+        <input x="3" y="11" name="ttl" len="16" />
+
+        <button x="5" y="13" action="SUBMIT">Create</button>
+    </body>
+</RTML>
