@@ -9,7 +9,10 @@
         "rtml/panel.rtml",
         "rtml/login.rtml",
         "rtml/dns.rtml",
-        "rtml/nat.rtml"
+        "rtml/nat.rtml",
+        "rtml/dhcp.rtml",
+        "rtml/dns/edit.rtml",
+        "rtml/dns/new.rtml"
     ],
     "exec": null,
     "cmpt": null,
