@@ -9,13 +9,13 @@ local rtmlLoader = pos.require('net.rtml.rtmlLoader')
 ---@field private __extModem ModemPeripheral
 ---@field private __intInterface NetInterface
 ---@field private __intModem ModemPeripheral
----@field private __intMessages { string: boolean }
----@field private __extMessages { string: boolean }
----@field private __outMessages { NetAddress: { number: NAT.MessageRecord } }
----@field private __conIdTable { string: number }
----@field private __inMessages { NetAddress: { number: NAT.MessageRecord } }
----@field private __sockets { number: NAT.SocketRecord }
----@field private __socketsByOrigin { NetAddress: { NetAddress: number } }
+---@field private __intMessages { [string]: boolean }
+---@field private __extMessages { [string]: boolean }
+---@field private __outMessages { [NetAddress]: { [number]: NAT.MessageRecord } }
+---@field private __conIdTable { [string]: number }
+---@field private __inMessages { [NetAddress]: { [number]: NAT.MessageRecord } }
+---@field private __sockets { [number]: NAT.SocketRecord }
+---@field private __socketsByOrigin { [NetAddress]: { [NetAddress]: number } }
 local NAT = {}
 
 local NAT_MT = {
@@ -167,7 +167,7 @@ function NAT:__messageHandlerInt(port, msg)
 
             ---@type NetMessage
             local inMsg = {
-                origin = self.__extInterface:getIP() --[[@as NetAddress]],
+                origin = self.__extInterface:getIp() --[[@as NetAddress]],
                 dest = msg.dest,
                 header = msg.header,
                 body = msg.body,
@@ -265,7 +265,7 @@ function NAT:__messageHandlerExt(port, msg)
 
     local rule = nil ---@type NAT.ForwardingRecord?
     if msg.header.domain then
-        local r = self:__dbQuery('SELECT * FROM %s WHERE domain = "%s"', FORWARDING_TABLE, msg.header.domain) --[[@as { number: NAT.ForwardingRecord } ]]
+        local r = self:__dbQuery('SELECT * FROM %s WHERE domain = "%s"', FORWARDING_TABLE, msg.header.domain) --[[@as { [number]: NAT.ForwardingRecord } ]]
         if #r >= 1 then
             for _, rl in pairs(r) do
                 if not rl.port then
@@ -278,7 +278,7 @@ function NAT:__messageHandlerExt(port, msg)
             end
         end
     else
-        local r = self:__dbQuery('SELECT * FROM %s WHERE port = %s', FORWARDING_TABLE, port) --[[@as { number: NAT.ForwardingRecord } ]]
+        local r = self:__dbQuery('SELECT * FROM %s WHERE port = %s', FORWARDING_TABLE, port) --[[@as { [number]: NAT.ForwardingRecord } ]]
         if #r >= 1 then
             for _, rl in pairs(r) do
                 if not rl.domain then
@@ -288,7 +288,7 @@ function NAT:__messageHandlerExt(port, msg)
             end
         end
         if not rule then
-            r = self:__dbQuery('SELECT * FROM %s', FORWARDING_TABLE, port) --[[@as { number: NAT.ForwardingRecord } ]]
+            r = self:__dbQuery('SELECT * FROM %s', FORWARDING_TABLE, port) --[[@as { [number]: NAT.ForwardingRecord } ]]
             if #r >= 1 then
                 for _, rl in pairs(r) do
                     if not (rl.domain or rl.port) then

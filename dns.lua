@@ -83,6 +83,7 @@ function DNS:__getDNSRecord(targetDomain)
             local rsp = self.extInterface:sendSync(net.standardPorts.network, 0xffffffff, MSG_TYPE_DNS_GET,
                 { domain = targetDomain })
             if type(rsp) ~= 'string' then
+                ---@cast rsp DNS.Message
                 if rsp.header.code == 'found' then
                     record = rsp.body.record ---@type DNS.DNSRecord
                     if not record then
@@ -90,7 +91,7 @@ function DNS:__getDNSRecord(targetDomain)
                             domain = rsp.header.hostname,
                             ttl = 60,
                             type = 'A',
-                            ip = rsp.body.ip,
+                            ip = rsp.origin --[[@as number]],
                         }
                     end
                     record.time = os.epoch('utc')

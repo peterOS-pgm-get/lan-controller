@@ -87,7 +87,7 @@ dhcp:start()
 dns:start()
 nat:start()
 
-local tokens = {} ---@type table<string, LANController.Token>
+local tokens = {} ---@type { [string]: LANController.Token }
 ---@class LANController.Token
 ---@field token string
 ---@field expire number
