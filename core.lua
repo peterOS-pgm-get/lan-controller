@@ -186,6 +186,7 @@ insideInterface:addMsgHandler(function(msg)
         else
             code = rttp.responseCodes.seeOther
             header = {
+                type = 'rttp',
                 redirect = '/',
                 cookies = { token = '', redirect = msg.header.path }
             }
@@ -194,7 +195,7 @@ insideInterface:addMsgHandler(function(msg)
         end
 
         if not header then
-            header = {}
+            header = { type = 'rttp' }
         end
         header.type = 'rttp'
         header.code = code

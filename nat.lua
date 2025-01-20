@@ -6,9 +6,9 @@ local rtmlLoader = pos.require('net.rtml.rtmlLoader')
 ---@field config LANControllerConfig
 ---@field private __handlerId number?
 ---@field private __extInterface NetInterface
----@field private __extModem table
+---@field private __extModem ModemPeripheral
 ---@field private __intInterface NetInterface
----@field private __intModem table
+---@field private __intModem ModemPeripheral
 ---@field private __intMessages { string: boolean }
 ---@field private __extMessages { string: boolean }
 ---@field private __outMessages { NetAddress: { number: NAT.MessageRecord } }
