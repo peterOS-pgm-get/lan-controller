@@ -6,6 +6,7 @@
 
 ---@class DNS.Message.Header : NetMessage.Header
 ---@field code string
+---@field hostname string?
 
 ---@class DNS.Message.Body
 ---@field record DNS.DNSRecord

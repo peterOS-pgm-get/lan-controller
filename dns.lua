@@ -85,7 +85,7 @@ function DNS:__getDNSRecord(targetDomain)
             if type(rsp) ~= 'string' then
                 ---@cast rsp DNS.Message
                 if rsp.header.code == 'found' then
-                    record = rsp.body.record ---@type DNS.DNSRecord
+                    record = rsp.body.record
                     if not record then
                         record = {
                             domain = rsp.header.hostname,

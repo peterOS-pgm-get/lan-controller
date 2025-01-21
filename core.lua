@@ -100,7 +100,7 @@ local function processRTTP(msg, token)
             if msg.body.user ~= 'admin' then
                 return rttp.responseCodes.unauthorized, 'text/plain', 'invalid credentials'
             end
-            if msg.bod.pass ~= cfg.remoteControl.password then
+            if msg.body.pass ~= cfg.remoteControl.password then
                 return rttp.responseCodes.unauthorized, 'text/plain', 'invalid credentials'
             end
             tokens[origin] = {

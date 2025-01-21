@@ -83,7 +83,7 @@ end
 
 function NAT:start()
     self.__handlerId = pos.addEventHandler(function(event)
-        local _, side, port, _, msg = unpack(event)
+        local _, side, port, _, msg = table.unpack(event)
         if side == self.config.modems.inside then
             local msgid = getMsgIdentifier(msg)
             if self.__intMessages[msgid] then
@@ -150,8 +150,8 @@ function NAT:__messageHandlerInt(port, msg)
         self.__sockets[socketID] = {
             origin = msg.origin,
             conId = msg.header.conId,
-            socketId = msg.header.originSocketId,
-            dest = msg.dest,
+            originSocketId = msg.header.originSocketId,
+            dest = msg.dest
         }
         msg.header.destSocketId = socketID
     end
