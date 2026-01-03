@@ -5,6 +5,8 @@
             DNS Panel
         </text>
         <link x="2" href="/panel">Root Panel</link>
+        
+        <link x="13" y="2" href="/dns/new">New Record</link>
 
         <text x="2" y="4">Domain</text>
         <text x="18" y="4">Type</text>

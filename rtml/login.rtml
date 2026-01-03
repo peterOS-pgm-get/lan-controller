@@ -9,7 +9,7 @@
         <input x="9" y="4" len="16" name="user" next="pass" />
     
         <text x="3" y="5">Pass:</text>
-        <input x="9" y="5" len="16" name="pass" hide="true"></input>
+        <input x="9" y="5" len="16" name="pass" hide="true" />
     
         <button x="4" y="6" action="SUBMIT">
             Login

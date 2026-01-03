@@ -3,6 +3,8 @@ pos.require('net.rtml')
 local rtmlLoader = pos.require('net.rtml.rtmlLoader')
 local sha256 = pos.require("hash.sha256")
 
+print('Starting LAN-Controller')
+
 ---@class LANControllerConfig
 local defaultConfig = {
     database = 'lan-controller',
@@ -22,13 +24,15 @@ local defaultConfig = {
     
     assignLANHostname = false,
 
-    hostname = nil
+    hostname = nil,
+    global = false,
+    verbose = false,
 }
 local config = pos.Config('%appdata%/lan-controller/config.json', defaultConfig, true)
 local cfg = config.data ---@type LANControllerConfig
 
 cfg.baseAddr = net.ipToNumber(cfg.baseAddr)
-cfg.subnetMask = net.ipToNumber(cfg.baseAddr)
+cfg.subnetMask = net.ipToNumber(cfg.subnetMask)
 
 local logger = pos.Logger('lan-controller.log', false, true)
 
@@ -57,10 +61,13 @@ end
 ---@param service LANController.Service
 ---@param cmd string
 ---@vararg string|number
+---@return any
 function LANController.dbQuery(service, cmd, ...)
     if ... then
         cmd = cmd:format(...)
     end
+    logger:debug('Running DB query: `%s`', cmd)
+    service.logger:debug('Running DB query: `%s`', cmd)
     local s, r = netdb.server.run(LANController.config.database, cmd)
     if not s then
         service.logger:error('DB Error: %s', r)
@@ -69,11 +76,22 @@ function LANController.dbQuery(service, cmd, ...)
     return r
 end
 
-local insideInterface = net.NetInterface('lan_0', cfg.modems.inside, cfg.baseAddr)
-insideInterface:setConfig({ respondToPing = true, receiveAll = true })
+local insideInterface = net.NetInterface('lan_0', cfg.modems.inside, cfg.baseAddr + 1)
+---@diagnostic disable-next-line: invisible
+insideInterface.__subnetMask = cfg.subnetMask --[[@as number]]
+insideInterface:setConfig({ respondToPing = true, receiveAll = (not cfg.global), verbose = cfg.verbose })
+insideInterface:setup()
+insideInterface:open(net.standardPorts.rttp)
 LANController.insideInterface = insideInterface
-local outsideInterface = net.NetInterface('ext_0', cfg.modems.outside)
-outsideInterface:setConfig({ respondToPing = true, hostname = cfg.hostname })
+local outsideInterface = insideInterface;
+if not cfg.global then
+    outsideInterface = net.NetInterface('ext_0', cfg.modems.outside)
+    outsideInterface:setConfig({ respondToPing = true, hostname = cfg.hostname, verbose = cfg.verbose })
+    outsideInterface:setup()
+    net.setDefaultInterface(outsideInterface)
+else
+    net.setDefaultInterface(insideInterface)
+end
 LANController.outsideInterface = outsideInterface
 
 local dhcp = dofile('dhcp.lua') --[[@as DHCP]].new(LANController, pos.Logger('dhcp.log', false, true)) ---@type DHCP
@@ -85,7 +103,11 @@ LANController.nat = nat
 
 dhcp:start()
 dns:start()
-nat:start()
+if not cfg.global then
+    nat:start()
+else
+    print("Starting global controller")
+end
 
 local tokens = {} ---@type { [string]: LANController.Token }
 ---@class LANController.Token
@@ -97,38 +119,39 @@ local function processRTTP(msg, token)
     local origin = net.getOriginString(msg)
     if msg.header.path == '/' then
         if msg.header.method == 'POST' then
-            if msg.body.user ~= 'admin' then
+            if msg.body.vals.user ~= 'admin' then
                 return rttp.responseCodes.unauthorized, 'text/plain', 'invalid credentials'
             end
-            if msg.body.pass ~= cfg.remoteControl.password then
+            if msg.body.vals.pass ~= cfg.remoteControl.password then
                 return rttp.responseCodes.unauthorized, 'text/plain', 'invalid credentials'
             end
+            token = sha256.hash(origin .. string.randomString(8))
             tokens[origin] = {
                 expire = os.epoch('utc') + (10 * 60 * 1000),
-                token = sha256.hash(origin .. string.randomString(8))
+                token = token
             }
             local dest = '/panel'
-            if msg.header.cookies and msg.header.cookies.redirect then
+            if msg.header.cookies and msg.header.cookies.redirect and msg.header.cookies.redirect ~= '' then
                 dest = msg.header.cookies.redirect
             end
-            return rttp.responseCodes.movedTemporarily, 'text/plain', 'valid login', { redirect = dest }
+            return rttp.responseCodes.movedTemporarily, 'text/plain', 'valid login', { redirect = dest, cookies = { token = token, redirect = '' } }
         end
         if token then
             local dest = '/panel'
-            if msg.header.cookies and msg.header.cookies.redirect then
+            if msg.header.cookies and msg.header.cookies.redirect and msg.header.cookies.redirect ~= '' then
                 dest = msg.header.cookies.redirect
             end
-            return rttp.responseCodes.movedTemporarily, 'text/plain', 'already logged in', { redirect = dest }
+            return rttp.responseCodes.movedTemporarily, 'text/plain', 'already logged in', { redirect = dest, cookies = { redirect = '' } }
         end
         
-        return rttp.responseCodes.okay, 'table/rtml', rtmlLoader.loadFile('rtml/login.rtml')
+        return rttp.responseCodes.okay, 'table/rtml', rtmlLoader.loadFile('/os/bin/lan-controller/rtml/login.rtml')
     elseif msg.header.path == '/logout' then
         tokens[origin] = nil
-        return rttp.responseCodes.movedTemporarily, 'text/plain', 'logged out', { cookies = { token = '' } }
+        return rttp.responseCodes.movedTemporarily, 'text/plain', 'logged out', { cookies = { token = '' }, redirect = '/' }
     elseif msg.header.path == '/panel' then
-        return rttp.responseCodes.okay, 'table/rtml', rtmlLoader.loadFile('rtml/panel.rtml')
+        return rttp.responseCodes.okay, 'table/rtml', rtmlLoader.loadFile('/os/bin/lan-controller/rtml/panel.rtml')
     else
-        return rttp.responseCodes.notFound, 'table/rtml', rtmlLoader.loadFile('rtml/404.rtml')
+        return rttp.responseCodes.notFound, 'table/rtml', rtmlLoader.loadFile('/os/bin/lan-controller/rtml/404.rtml')
     end
 end
 
@@ -168,12 +191,27 @@ insideInterface:addMsgHandler(function(msg)
             end
         end
 
-        if not token then
+        if token and msg.header.path == '/' then
+            code = rttp.responseCodes.movedTemporarily
+            header = {
+                type = 'rttp',
+                redirect = '/panel',
+                cookies = { redirect = '' }
+            }
+            contentType = 'text/plain'
+            body = 'Already logged in'
+        elseif token then
             local s, e = pcall(function()
                 if msg.header.path:start('/dhcp') then
                     code, contentType, body, header = dhcp:handleRTTP(msg)
                 elseif msg.header.path:start('/nat') then
-                    code, contentType, body, header = nat:handleRTTP(msg)
+                    if cfg.global then
+                        code = rttp.responseCodes.serviceUnavailable
+                        contentType= 'table/rtml'
+                        body = rtmlLoader.loadFile('/os/bin/lan-controller/rtml/serviceInactive.rtml')
+                    else
+                        code, contentType, body, header = nat:handleRTTP(msg)
+                    end
                 elseif msg.header.path:start('/dns') then
                     code, contentType, body, header = dns:handleRTTP(msg)
                 else
@@ -183,8 +221,15 @@ insideInterface:addMsgHandler(function(msg)
             if not s then
                 logger:error('RTTP Handler Error: %s', e)
             end
+        elseif msg.header.path == '/' then
+            local s, e = pcall(function()
+                code, contentType, body, header = processRTTP(msg, token)
+            end)
+            if not s then
+                logger:error('RTTP Handler Error: %s', e)
+            end
         else
-            code = rttp.responseCodes.seeOther
+            code = rttp.responseCodes.movedTemporarily
             header = {
                 type = 'rttp',
                 redirect = '/',

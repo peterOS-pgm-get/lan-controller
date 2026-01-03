@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RTML>
+<RTML version="1">
     <body>
-        <text>DNS - Edit Record</text>
-        <link x="2" href="/dns">DNNS Panel</link>
+        <text>DNS - New Record</text>
+        <link x="2" href="/dns">DNS Panel</link>
 
         <text x="3" y="4">Domain</text>
         <input x="3" y="5" name="domain" len="16" />
         <text x="3" y="6">Type (A, CNAME, NS)</text>
         <input x="3" y="7" name="type" len="16" />
-        <text x="3" y="8">Porinter</text>
+        <text x="3" y="8">Pointer</text>
         <input x="3" y="9" name="pointer" len="16" />
         <text x="3" y="10">TTL (minutes)</text>
         <input x="3" y="11" name="ttl" len="16" />

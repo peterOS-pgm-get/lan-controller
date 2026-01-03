@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RTML version="1">
+    <body>
+        <text x="5" y="5">Service is not currently active</text>
+        <link x="5" y="6" href="/panel">Panel</link>
+    </body>
+</RTML>

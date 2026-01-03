@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RTML version="1">
+    <body>
+        <text>NAT - New forwarding rule</text>
+        <link x="2" href="/nat">NAT Panel</link>
+
+        <text x="3" y="4">Domain</text>
+        
+        <text x="3" y="6">Port</text>
+        
+        <text x="3" y="8">Destination</text>
+        <input x="3" y="9" name="dest" len="16" />
+
+        <button x="3" y="11" action="SUBMIT">Update</button>
+        
+        <button x="12" y="11" action="PUSH" color="red" href="">Delete</button>
+
+        <link x="20" y="11" href="../../">Cancel</link>
+    </body>
+</RTML>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RTML>
+<RTML version="1">
     <body>
         <text>DNS - Edit Record</text>
-        <link x="2" href="/dns">DNNS Panel</link>
+        <link x="2" href="/dns">DNS Panel</link>
 
         <input x="3" y="5" name="type" len="16" />
-        <input x="3" y="6" name="pointer" len="16" />
-        <input x="3" y="7" name="ttl" len="16" />
+        <input x="3" y="7" name="pointer" len="16" />
+        <input x="3" y="9" name="ttl" len="16" />
 
-        <button x="5" y="9" action="SUBMIT">Update</button>
-        <button x="5" y="11" action="PUSH" color="red">Remove</button>
+        <button x="5" y="10" action="SUBMIT">Update</button>
+        <button x="5" y="12" action="PUSH" color="red" href="remove">Remove</button>
     </body>
 </RTML>
