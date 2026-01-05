@@ -197,9 +197,9 @@ function NAT:__messageHandlerInt(port, msg)
         msg.header.destSocketId = socketID
     end
 
-    if msg.header.conId then -- from an existing connection
-        self.logger:debug('- Message had connection ID: %d', msg.header.conId)
-        local outConId = msg.header.conId
+    if msg.header.destConId then -- from an existing connection
+        self.logger:debug('- Message had connection ID: %d', msg.header.destConId)
+        local outConId = msg.header.destConId
         if not self.__inMessages[outConId] then
             self.logger:warn('??')
             return
@@ -375,6 +375,7 @@ function NAT:__messageHandlerExt(port, msg)
     
     -- local msgid = self.__intInterface:useMsgId()
     local msgid = msg.msgid
+    
 
     ---@type NetMessage
     local inMsg = copyObject({
