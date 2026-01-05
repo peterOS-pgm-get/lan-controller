@@ -137,7 +137,7 @@ function NAT:__getConIdStr(msg)
     elseif msg.header.destConId then
         destStr = destStr .. ':' .. msg.header.destConId
     end
-    
+
     local paring = originStr .. '-' .. destStr
     local conId = nil
     if self.__conIdTable[paring] then
@@ -147,6 +147,17 @@ function NAT:__getConIdStr(msg)
         self.__conIdTable[paring] = conId
     end
     return conId
+end
+
+local function copyObject(src)
+    if type(src) ~= "table" then
+        return src
+    end
+    local o = {}
+    for k,v in pairs(src) do
+        o[k] = copyObject(v)
+    end
+    return o
 end
 
 ---
@@ -185,7 +196,7 @@ function NAT:__messageHandlerInt(port, msg)
         }
         msg.header.destSocketId = socketID
     end
-    
+
     if msg.header.conId then -- from an existing connection
         self.logger:debug('- Message had connection ID: %d', msg.header.conId)
         local outConId = msg.header.conId
@@ -201,16 +212,17 @@ function NAT:__messageHandlerInt(port, msg)
             msg.header.conId = nil
 
             ---@type NetMessage
-            local outMsg = {
+            local outMsg = copyObject({
                 origin = self.__extInterface:getIp() --[[@as NetAddress]],
                 dest = msg.dest,
                 header = msg.header,
                 body = msg.body,
                 msgid = msg.msgid,
                 port = port,
-                reply = function () end
-            }
-            self.logger:debug('Passing connection message out: %s:%d C#%d #%d', net.ipFormat(outMsg.dest), port, outConId, outMsg.msgid)
+                reply = function() end
+            })
+            self.logger:debug('Passing connection message out: %s:%d C#%d #%d', net.ipFormat(outMsg.dest), port, outConId,
+                outMsg.msgid)
             -- self.__extModem.transmit(port, port, outMsg)
             self.__extInterface:sendRaw(outMsg, port)
             return
@@ -218,7 +230,7 @@ function NAT:__messageHandlerInt(port, msg)
             self.logger:warn('Message had connection ID, but message id didn\'t exist in table')
         end
     end
-    
+
     -- the message must be for someone outside now
     local conId = self:__getConIdStr(msg)
     if not self.__outMessages[conId] then
@@ -228,7 +240,7 @@ function NAT:__messageHandlerInt(port, msg)
     -- local msgid = self.__extInterface:useMsgId()
     local msgid = msg.msgid
     ---@type NetMessage
-    local outMsg = {
+    local outMsg = copyObject({
         origin = self.__extInterface:getIp() --[[@as NetAddress]],
         dest = msg.dest,
         header = msg.header,
@@ -236,7 +248,7 @@ function NAT:__messageHandlerInt(port, msg)
         msgid = msgid,
         port = port,
         reply = function() end
-    }
+    })
     self.__outMessages[conId][msgid] = {
         dest = msg.origin,
         destConId = msg.header.conId,
@@ -271,7 +283,7 @@ function NAT:__messageHandlerExt(port, msg)
         msg.header.destConId = socketRecord.conId
         
         ---@type NetMessage
-        local inMsg = {
+        local inMsg = copyObject({
             origin = msg.origin,
             dest = socketRecord.origin,
             header = msg.header,
@@ -279,7 +291,7 @@ function NAT:__messageHandlerExt(port, msg)
             msgid = msg.msgid,
             port = port,
             reply = function () end
-        }
+        })
 
         -- self.__intModem.transmit(port, port, inMsg)
         self.__intInterface:sendRaw(inMsg, port)
@@ -296,7 +308,7 @@ function NAT:__messageHandlerExt(port, msg)
             msg.header.destConId = msgRecord.destConId
 
             ---@type NetMessage
-            local inMsg = {
+            local inMsg = copyObject({
                 origin = msg.origin,
                 dest = msgRecord.dest,
                 header = msg.header,
@@ -304,7 +316,7 @@ function NAT:__messageHandlerExt(port, msg)
                 msgid = msg.msgid,
                 port = port,
                 reply = function () end
-            }
+            })
             -- self.__intModem.transmit(port, port, inMsg)
             self.__intInterface:sendRaw(inMsg, port)
             self.logger:debug('Passed message in on existing connection to %s', net.ipFormat(inMsg.dest))
@@ -365,7 +377,7 @@ function NAT:__messageHandlerExt(port, msg)
     local msgid = msg.msgid
 
     ---@type NetMessage
-    local inMsg = {
+    local inMsg = copyObject({
         origin = msg.origin,
         dest = destIP,
         header = msg.header,
@@ -373,7 +385,7 @@ function NAT:__messageHandlerExt(port, msg)
         msgid = msgid,
         port = port,
         reply = function() end
-    }
+    })
     local conId = self:__getConIdStr(inMsg)
     inMsg.header.conId = conId
 
