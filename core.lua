@@ -58,6 +58,7 @@ if not netdb then
     error('NetDB must be started before LAN-Controller')
 end
 
+netdb.setup()
 if not netdb.server.hasDb(LANController.config.database) then
     netdb.server.createDatabase(LANController.config.database)
 end

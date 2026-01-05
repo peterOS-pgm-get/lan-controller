@@ -75,8 +75,6 @@ function NAT:__init__(controller, logger)
     self.__outMessages = {}
     self.__inMessages = {}
     self.__conIdTable = {}
-
-    local r = self:__dbQuery('sele')
 end
 
 ---@package
@@ -116,7 +114,7 @@ function NAT:start()
         self.__extInterface:open(port)
     end
     
-    self:__dbQuery("CREATE TABLE %s ( domain string NOT_NIL, port number NOT_NIL, dest string NOT_NIL )", FORWARDING_TABLE)
+    self:__dbQuery("CREATE TABLE IF NOT EXISTS %s ( domain string NOT_NIL, port number NOT_NIL, dest string NOT_NIL )", FORWARDING_TABLE)
 end
 
 function NAT:__getParingString(msg)
