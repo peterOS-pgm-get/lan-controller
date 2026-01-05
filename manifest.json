@@ -12,7 +12,9 @@
         "rtml/nat.rtml",
         "rtml/dhcp.rtml",
         "rtml/dns/edit.rtml",
-        "rtml/dns/new.rtml"
+        "rtml/dns/new.rtml",
+        "rtml/nat/edit.rtml",
+        "rtml/nat/new.rtml"
     ],
     "exec": null,
     "cmpt": null,

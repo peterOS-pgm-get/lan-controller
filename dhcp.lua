@@ -215,7 +215,7 @@ function DHCP:__messageHandler(msg)
         end
 
         lease.time = sysTime + (8.64e7 * 365)
-        self:__dbQuery('UPDATE %S SET time = %d', LEASE_TABLE, lease.time)
+        self:__dbQuery('UPDATE %S SET time = %d WHERE owner = "%s"', LEASE_TABLE, lease.time, lease.owner)
         msg:reply(net.standardPorts.network, { type = MSG_TYPE_IP_RENEW_RETURN }, {
             action = 'renewed',
             ip = lease.ip,
