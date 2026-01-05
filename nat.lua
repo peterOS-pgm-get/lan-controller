@@ -206,7 +206,7 @@ function NAT:__messageHandlerInt(port, msg)
         end
         local msgRecord = self.__inMessages[outConId][msg.msgid]
         if msgRecord then
-            self.__outMessages[outConId][msg.msgid] = nil
+            self.__inMessages[outConId][msg.msgid] = nil
 
             msg.header.destConId = msgRecord.destConId
             msg.header.conId = nil
