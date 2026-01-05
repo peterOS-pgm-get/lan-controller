@@ -67,6 +67,9 @@ function DNS:start()
     self.__handlerId = self.interface:addMsgHandler(function(msg)
         self:__messageHandler(msg)
     end)
+
+    self:__dbQuery("CREATE TABLE %s ( domain string NOT_NIL, type string NOT_NIL def='A', ip number, pointer string, ttl number NOT_NIL )", DNS_TABLE)
+    self:__dbQuery("CREATE TABLE %s ( domain string NOT_NIL, type string NOT_NIL def='A', ip number, pointer string, ttl number NOT_NIL, time number NOT_NIL )", REMOTE_DNS_TABLE)
 end
 
 ---@param targetDomain string

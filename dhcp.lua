@@ -69,6 +69,8 @@ function DHCP:start()
             self.logger:error('Handler error: %s', e)
         end
     end)
+
+    self:__dbQuery("CREATE TABLE %s ( owner string PRIMARY_KEY, ip number NOT_NIL, time number NOT_NIL, hostname string )", LEASE_TABLE)
 end
 
 ---@package

@@ -58,6 +58,10 @@ if not netdb then
     error('NetDB must be started before LAN-Controller')
 end
 
+if not netdb.server.hasDb(LANController.config.database) then
+    netdb.server.createDatabase(LANController.config.database)
+end
+
 ---@param service LANController.Service
 ---@param cmd string
 ---@vararg string|number
